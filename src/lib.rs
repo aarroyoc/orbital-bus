@@ -1,5 +1,6 @@
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -11,13 +12,13 @@ mod renderer;
 use web::*;
 use renderer::*;
 
-fn system_renderer(world: &mut World, context: &web_sys::CanvasRenderingContext2d) {
+fn system_renderer(world: &mut World, context: &web_sys::CanvasRenderingContext2d, store: &HashMap<&'static str, web_sys::HtmlImageElement>) {
     for (_id, visual) in &mut world.query::<&Visual>() {
-        visual.painter.paint(&context);
+        visual.painter.paint(&context, &store);
     }
 }
 
-fn world_level_1() -> World {
+fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement>) -> World {
     let mut world = World::new();
     {
         let renderer = CircleRenderer {
@@ -47,7 +48,7 @@ fn world_level_1() -> World {
         world.spawn((visual,));
     }
     {
-        let renderer = SpriteRenderer::new("/comuneros.jpg", Position { x: 300.0, y: 300.0});
+        let renderer = SpriteRenderer::new("/comuneros.jpg", Position { x: 300.0, y: 300.0}, &mut store);
         let visual = Visual {
             painter: Box::new(renderer)
         };
@@ -76,7 +77,8 @@ pub fn start() {
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
 
-    let world = world_level_1();
+    let mut store = HashMap::new();
+    let world = world_level_1(&mut store);
 
     let input = Rc::new(RefCell::new(Input::default()));
     let input_handler = input.clone();
@@ -90,11 +92,11 @@ pub fn start() {
     
     let ginput = input.clone();
     request_animation_frame(move ||{
-        gloop(context, world, ginput);
+        gloop(context, world, ginput, store);
     });
 }
 
-pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc<RefCell<Input>>){
+pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc<RefCell<Input>>, store: HashMap<&'static str, web_sys::HtmlImageElement>){
     let mut world = world;
     context.clear_rect(0.0, 0.0, 150.0, 150.0);
     {
@@ -106,9 +108,9 @@ pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc
             context.set_fill_style(&JsValue::from_str("#000000"));
         }
 
-        system_renderer(&mut world, &context);
+        system_renderer(&mut world, &context, &store);
     }
     request_animation_frame(move ||{
-        gloop(context, world, input);
+        gloop(context, world, input, store);
     });
 }

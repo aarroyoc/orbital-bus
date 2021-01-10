@@ -1,13 +1,14 @@
 use std::f64;
-use std::cell::RefCell;
 use std::collections::HashMap;
 
 use wasm_bindgen::JsCast;
 
 use crate::web::*;
 
+type ImageStore = HashMap<&'static str, web_sys::HtmlImageElement>;
+
 pub trait Paintable: Send + Sync + 'static {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d);
+    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, store: &ImageStore);
 }
 
 pub struct Position {
@@ -21,7 +22,7 @@ pub struct CircleRenderer {
 }
 
 impl Paintable for CircleRenderer {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d) {
+    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, _store: &ImageStore) {
         context.begin_path();
 
         context
@@ -39,13 +40,9 @@ pub struct RectRenderer {
 }
 
 impl Paintable for RectRenderer {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d) {
+    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, _store: &ImageStore) {
         context.fill_rect(self.position.x, self.position.y, self.width, self.height);
     }
-}
-
-thread_local! {
-    static SPRITES: RefCell<HashMap<&'static str, web_sys::HtmlImageElement>> = RefCell::new(HashMap::new());
 }
 
 pub struct SpriteRenderer {
@@ -54,16 +51,13 @@ pub struct SpriteRenderer {
 }
 
 impl SpriteRenderer {
-    pub fn new(url: &'static str, position: Position) -> Self {
+    pub fn new(url: &'static str, position: Position, store: &mut ImageStore) -> Self {
         let img = document().create_element("img")
             .expect("Unable to create img element")
             .dyn_into::<web_sys::HtmlImageElement>()
             .unwrap();
         img.set_src(url);
-        SPRITES.with(|sprites|{
-            let mut sprites = sprites.borrow_mut();
-            sprites.insert(url, img);
-        });
+        store.insert(url, img);
         SpriteRenderer {
             position,
             image: url
@@ -72,12 +66,9 @@ impl SpriteRenderer {
 }
 
 impl Paintable for SpriteRenderer {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d) {
-        SPRITES.with(|sprites|{
-            let sprites = sprites.borrow();
-            let image = sprites.get(self.image);
-            context.draw_image_with_html_image_element(&image.unwrap(), self.position.x, self.position.y).unwrap();
-        });
+    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, store: &ImageStore) {
+        let image = store.get(self.image);
+        context.draw_image_with_html_image_element(&image.unwrap(), self.position.x, self.position.y).unwrap();
     }
 }
 
