@@ -1,0 +1,27 @@
+on: push
+name: Test
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        rust-version: [stable, beta, nightly]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Install rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust-version }}
+          override: true
+          target: wasm32-unknown-unknown
+      - name: Install wasm-bindgen
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: wasm-bindgen
+      - name: Build
+        run: make
+      

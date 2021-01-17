@@ -7,17 +7,15 @@ use wasm_bindgen::JsCast;
 use instant::Instant;
 use hecs::*;
 
-mod web;
-mod renderer;
 mod dynamics;
+mod input;
+mod renderer;
+mod web;
 
-use web::*;
-use renderer::*;
+use input::*;
 use dynamics::*;
-
-const MAX_SPEED: f64 = 1000.0;
-const SPEED_INCREMENT: f64 = 1000.0;
-const SPEED_DECREMENT: f64 = 600.0;
+use renderer::*;
+use web::*;
 
 struct SpaceShip {
     angle: f64
@@ -26,58 +24,6 @@ struct SpaceShip {
 struct EndZone {
     width: f64,
     height: f64,
-}
-
-fn system_renderer(world: &mut World, context: &web_sys::CanvasRenderingContext2d, store: &HashMap<&'static str, web_sys::HtmlImageElement>) {
-    for (_id, spaceship) in &mut world.query::<With<SpaceShip, &Position>>(){
-        let offset_x = spaceship.x - 680.0;
-        let offset_y = spaceship.y - 384.0;
-        for (_id, (visual, position)) in &mut world.query::<(&Visual, &Position)>() {
-            let position = Position {
-                x: position.x - offset_x,
-                y: position.y - offset_y,
-                angle: 0.0,
-            };
-            visual.painter.paint(&context, &position, &store);
-        }
-    }
-    
-}
-
-fn system_gravity(world: &mut World, delta: f64) {
-    for (_id, (position, velocity)) in &mut world.query::<(&mut Position, &mut Velocity)>() {
-        for (_id, (mass_position, mass)) in &mut world.query::<(&Position, &Mass)>() {
-            velocity.x += (mass_position.x-position.x) * delta * mass.mass;
-            velocity.y += (mass_position.y-position.y) * delta * mass.mass;
-        }
-        // Roce
-        //velocity.x *= 0.99;
-        //velocity.y *= 0.99;
-        position.x += velocity.x * delta;
-        position.y += velocity.y * delta;
-    }
-}
-
-fn system_spacecraft_input(world: &mut World, input: &Input, delta: f64) {
-    for (_id, (spaceship, velocity)) in &mut world.query::<(&mut SpaceShip, &mut Velocity)>() {
-        spaceship.angle = velocity.y.atan2(velocity.x);
-        let mut x = velocity.x;
-        let mut y = velocity.y;
-        if input.forward {
-            x += SPEED_INCREMENT * delta * spaceship.angle.cos();
-            y += SPEED_INCREMENT * delta * spaceship.angle.sin();
-        }
-        if input.brake {
-            x -= SPEED_DECREMENT * delta * spaceship.angle.cos();
-            y -= SPEED_DECREMENT * delta * spaceship.angle.sin();
-        }
-        let speed = (x * x + y * y).sqrt();
-        if speed < MAX_SPEED {
-            velocity.x = x;
-            velocity.y = y;
-        }
-    }
-    
 }
 
 fn system_finish(world: &mut World) {
@@ -92,95 +38,71 @@ fn system_finish(world: &mut World) {
         }
     }
     if show_win {
-        let renderer = TextRenderer {
-            color: "black",
-            font: "20pt arial",
-            text: String::from("¡Victoria!")
-        };
-        let visual = Visual::from_paintable(Box::new(renderer));
+        let renderer = Renderer::text(String::from("¡Victoria!"), "black", "20pt arial");
         let position = Position {
             x: 550.0,
             y: 200.0,
-            angle: 0.0
         };
-        world.spawn((visual, position));
+        world.spawn((renderer, position));
     }
 }
 
-fn world_level_1(mut _store: &mut HashMap<&'static str, web_sys::HtmlImageElement>) -> World {
+fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement>) -> World {
     let mut world = World::new();
     {
-        let renderer = CircleRenderer {
-            radius: 100.0,
-            color: "#ff0000"
+        let mut renderer = Renderer::sprite("/space.png", &mut store);
+        renderer.set_z(-100);
+        renderer.set_fixed(true);
+        let position = Position {
+            x: 0.0,
+            y: 0.0,
         };
-        let visual = Visual::from_paintable(Box::new(renderer));
+        world.spawn((renderer, position));
+    }
+    {
+        let renderer = Renderer::circle(100.0, "#ff0000");
         let position = Position {
             x: 650.0,
             y: 400.0,
-            angle: 0.0
         };
         let mass = Mass {
             mass: 5.0
         };
-        world.spawn((visual, position, mass));
+        world.spawn((renderer, position, mass));
     }
     {
-        let renderer = RectRenderer {
-            width: 50.0,
-            height: 50.0,
-            color: "rgba(102, 145, 209, 0.7)"
-        };
-        let visual = Visual::from_paintable(Box::new(renderer));
+        let renderer = Renderer::rect(50.0, 50.0, "rgba(102, 145, 209, 0.7)");
         let position = Position {
             x: 800.0-25.0,
             y: 400.0-25.0,
-            angle: 0.0
         };
-        world.spawn((visual, position));
+        world.spawn((renderer, position));
     }
     {
-        let renderer = RectRenderer {
-            width: 100.0,
-            height: 100.0,
-            color: "rgba(250, 126, 55, 0.7)"
-        };
-        let visual = Visual::from_paintable(Box::new(renderer));
+        let renderer = Renderer::rect(100.0, 100.0, "rgba(250, 126, 55, 0.7)");
         let position = Position {
             x: 1100.0-50.0,
             y: 400.0-50.0,
-            angle: 0.0
         };
         let end = EndZone {
             width: 100.0,
             height: 100.0,
         };
-        world.spawn((visual, position, end));
+        world.spawn((renderer, position, end));
     }
     {
-        let renderer = TextRenderer {
-            color: "black",
-            font: "16pt arial",
-            text: String::from("Desplázate hasta el cuadrado naranja")
-        };
-        let visual = Visual::from_paintable(Box::new(renderer));
+        let renderer = Renderer::text(String::from("Desplázate hasta el cuadrado naranja"), "black", "16pt arial");
         let position = Position {
             x: 550.0,
             y: 100.0,
-            angle: 0.0
         };
-        world.spawn((visual, position));
+        world.spawn((renderer, position));
     }
     {
-        let renderer = CircleRenderer{
-            radius: 20.0,
-            color: "#00ff00"
-        };
-        let visual = Visual::from_paintable(Box::new(renderer));
+        let renderer = Renderer::circle(20.0, "#00ff00");
         let position = Position {
             x: 800.0,
             y: 400.0,
-            angle: 0.0,
         };
         let velocity = Velocity {
             x: 0.0,
@@ -189,15 +111,18 @@ fn world_level_1(mut _store: &mut HashMap<&'static str, web_sys::HtmlImageElemen
         let spaceship = SpaceShip {
             angle: 0.0
         };
-        world.spawn((visual, position, velocity, spaceship));
+        world.spawn((renderer, position, velocity, spaceship));
+    }
+    {
+        let camera = Camera {
+            offset: Position {
+                x: 0.0,
+                y: 0.0,
+            }
+        };
+        world.spawn((camera,));
     }
     world
-}
-
-#[derive(Default)]
-pub struct Input {
-    forward: bool,
-    brake: bool,
 }
 
 const KEY_W: u32 = 87;
@@ -275,6 +200,7 @@ pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc
             system_spacecraft_input(&mut world, &input, delta);
             system_gravity(&mut world, delta);
             system_finish(&mut world);
+            system_offset(&mut world);
             system_renderer(&mut world, &context, &store);
         }
     }

@@ -3,99 +3,186 @@ use std::collections::HashMap;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use hecs::{World, With};
+use itertools::Itertools;
 
+use crate::SpaceShip;
 use crate::web::*;
 use crate::dynamics::*;
 
 type ImageStore = HashMap<&'static str, web_sys::HtmlImageElement>;
-
 type Color = &'static str;
+type Font = &'static str;
 
-pub trait Paintable: Send + Sync + 'static {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, position: &Position, store: &ImageStore);
+pub struct Camera {
+    pub offset: Position
 }
 
-pub struct CircleRenderer {
-    pub radius: f64,
-    pub color: Color,
-}
-
-impl Paintable for CircleRenderer {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, position: &Position, _store: &ImageStore) {
-        context.begin_path();
-
-        context.set_fill_style(&JsValue::from_str(self.color));
-
-        context
-            .arc(position.x, position.y, self.radius, 0.0, f64::consts::PI * 2.0)
-            .unwrap();
-
-        context.fill();
+pub enum Renderer {
+    CircleRenderer {
+        radius: f64,
+        color: Color,
+        z: i32,
+        fixed: bool,  
+    },
+    RectRenderer {
+        width: f64,
+        height: f64,
+        color: Color,
+        z: i32,
+        fixed: bool,
+    },
+    TextRenderer {
+        text: String,
+        color: Color,
+        font: Font,
+        z: i32,
+        fixed: bool,
+    },
+    SpriteRenderer {
+        image: &'static str,
+        z: i32,
+        fixed: bool,
     }
 }
 
-pub struct RectRenderer {
-    pub width: f64,
-    pub height: f64,
-    pub color: Color,
-}
-
-impl Paintable for RectRenderer {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, position: &Position, _store: &ImageStore) {
-        context.set_fill_style(&JsValue::from_str(self.color));
-        context.fill_rect(position.x, position.y, self.width, self.height);
+impl Renderer {
+    pub fn circle(radius: f64, color: Color) -> Self {
+        Renderer::CircleRenderer {
+            radius,
+            color,
+            z: 0,
+            fixed: false
+        }
     }
-}
-
-pub struct SpriteRenderer {
-    image: &'static str,
-}
-
-impl SpriteRenderer {
-    pub fn new(url: &'static str, store: &mut ImageStore) -> Self {
+    pub fn rect(width: f64, height: f64, color: Color) -> Self {
+        Renderer::RectRenderer {
+            width,
+            height,
+            color,
+            z: 0,
+            fixed: false
+        }
+    }
+    pub fn text(text: String, color: Color, font: Font) -> Self {
+        Renderer::TextRenderer {
+            text,
+            color,
+            font,
+            z: 0,
+            fixed: false,
+        }
+    }
+    pub fn sprite(url: &'static str, store: &mut ImageStore) -> Self {
         let img = document().create_element("img")
             .expect("Unable to create img element")
             .dyn_into::<web_sys::HtmlImageElement>()
             .unwrap();
         img.set_src(url);
         store.insert(url, img);
-        SpriteRenderer {
-            image: url
+        Renderer::SpriteRenderer {
+            image: url,
+            z: 0,
+            fixed: false
         }
     }
-}
-
-impl Paintable for SpriteRenderer {
+    pub fn set_z(&mut self, new_z: i32) {
+        match self {
+            Renderer::CircleRenderer{z, ..} => *z = new_z,
+            Renderer::RectRenderer{z, ..} => *z = new_z,
+            Renderer::TextRenderer{z, ..} => *z = new_z,
+            Renderer::SpriteRenderer{z, ..} => *z = new_z,
+        }
+    }
+    pub fn get_z(&self) -> i32 {
+        match self {
+            Renderer::CircleRenderer{z, ..} => *z,
+            Renderer::RectRenderer{z, ..} => *z,
+            Renderer::TextRenderer{z, ..} => *z,
+            Renderer::SpriteRenderer{z, ..} => *z,
+        }
+    }
+    pub fn set_fixed(&mut self, new_fixed: bool) {
+        match self {
+            Renderer::CircleRenderer{fixed, ..} => *fixed = new_fixed,
+            Renderer::RectRenderer{fixed, ..} => *fixed = new_fixed,
+            Renderer::TextRenderer{fixed, ..} => *fixed = new_fixed,
+            Renderer::SpriteRenderer{fixed, ..} => *fixed = new_fixed,
+        }
+    }
+    pub fn is_fixed(&self) -> bool {
+        match self {
+            Renderer::CircleRenderer{fixed, ..} => *fixed,
+            Renderer::RectRenderer{fixed, ..} => *fixed,
+            Renderer::TextRenderer{fixed, ..} => *fixed,
+            Renderer::SpriteRenderer{fixed, ..} => *fixed,
+        }
+    }
     fn paint(&self, context: &web_sys::CanvasRenderingContext2d, position: &Position, store: &ImageStore) {
-        let image = store.get(self.image);
-        context.draw_image_with_html_image_element(&image.unwrap(), position.x, position.y).unwrap();
-    }
-}
+        match self {
+            Renderer::CircleRenderer { radius, color, ..} => {
+                context.begin_path();
 
-type Font = &'static str;
-
-pub struct TextRenderer {
-    pub text: String,
-    pub color: Color,
-    pub font: Font,
-}
-
-impl Paintable for TextRenderer {
-    fn paint(&self, context: &web_sys::CanvasRenderingContext2d, position: &Position, _store: &ImageStore) {
-        context.set_fill_style(&JsValue::from_str(self.color));
-        context.set_font(self.font);
-        context.fill_text(&self.text, position.x, position.y).unwrap();
-    }
-}
-
-pub struct Visual {
-    pub painter: Box<dyn Paintable>,
-}
-
-impl Visual {
-    pub fn from_paintable(renderer: Box<dyn Paintable>) -> Self {
-        Visual {
-            painter: renderer
+                context.set_fill_style(&JsValue::from_str(color));
+        
+                context
+                    .arc(position.x, position.y, *radius, 0.0, f64::consts::PI * 2.0)
+                    .unwrap();
+        
+                context.fill();
+            },
+            Renderer::RectRenderer { width, height, color, ..} => {
+                context.set_fill_style(&JsValue::from_str(color));
+                context.fill_rect(position.x, position.y, *width, *height);
+            },
+            Renderer::TextRenderer {color, font, text, .. } => {
+                context.set_fill_style(&JsValue::from_str(*color));
+                context.set_font(*font);
+                context.fill_text(text, position.x, position.y).unwrap();
+            },
+            Renderer::SpriteRenderer { image, ..} => {
+                let image = store.get(image);
+                context.draw_image_with_html_image_element(&image.unwrap(), position.x, position.y).unwrap();
+            }
         }
+    }
+}
+
+pub fn system_offset(world: &mut World) {
+    for (_id, position) in &mut world.query::<With<SpaceShip, &Position>>() {
+        for (_id, camera) in &mut world.query::<&mut Camera>() {
+            if position.x + camera.offset.x < 100.0 {
+                camera.offset.x = 100.0 - position.x;
+            }
+            if position.y + camera.offset.y < 100.0 {
+                camera.offset.y = 100.0 - position.y;
+            }
+            if position.x + camera.offset.x > 1260.0 {
+                camera.offset.x = 1260.0 - position.x;
+            }
+            if position.y + camera.offset.y > 668.0 {
+                camera.offset.y = 668.0 - position.y;
+            }
+        }
+    }
+}
+
+pub fn system_renderer<'a>(world: &mut World, context: &web_sys::CanvasRenderingContext2d, store: &HashMap<&'static str, web_sys::HtmlImageElement>) {
+    for (_id, camera) in &mut world.query::<&Camera>() {
+        world.query::<(&Renderer, &Position)>()
+            .iter()
+            .sorted_by_key(|(_id, (renderer, _position))| {
+                renderer.get_z()
+            }).for_each(|(_id, (renderer, position))|{
+                if renderer.is_fixed() {
+                    renderer.paint(&context, &position, &store);
+                } else {
+                    let position = Position {
+                        x: position.x + camera.offset.x,
+                        y: position.y + camera.offset.y,
+                    };
+                    renderer.paint(&context, &position, &store);
+                }
+        });
     }
 }
