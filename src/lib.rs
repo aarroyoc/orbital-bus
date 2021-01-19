@@ -50,7 +50,7 @@ fn system_finish(world: &mut World) {
 fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement>) -> World {
     let mut world = World::new();
     {
-        let mut renderer = Renderer::sprite("/space.png", &mut store);
+        let mut renderer = Renderer::sprite("space.png", &mut store);
         renderer.set_z(-100);
         renderer.set_fixed(true);
         let position = Position {
@@ -99,7 +99,7 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         world.spawn((renderer, position));
     }
     {
-        let renderer = Renderer::circle(20.0, "#00ff00");
+        let renderer = Renderer::sprite("spaceship.png", &mut store);
         let position = Position {
             x: 800.0,
             y: 400.0,

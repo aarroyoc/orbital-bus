@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use hecs::{World, With};
+use hecs::{World, With, Without};
 use itertools::Itertools;
 
 use crate::SpaceShip;
@@ -169,7 +169,7 @@ pub fn system_offset(world: &mut World) {
 
 pub fn system_renderer<'a>(world: &mut World, context: &web_sys::CanvasRenderingContext2d, store: &HashMap<&'static str, web_sys::HtmlImageElement>) {
     for (_id, camera) in &mut world.query::<&Camera>() {
-        world.query::<(&Renderer, &Position)>()
+        world.query::<Without<SpaceShip, (&Renderer, &Position)>>()
             .iter()
             .sorted_by_key(|(_id, (renderer, _position))| {
                 renderer.get_z()
@@ -184,5 +184,22 @@ pub fn system_renderer<'a>(world: &mut World, context: &web_sys::CanvasRendering
                     renderer.paint(&context, &position, &store);
                 }
         });
+        for (_id, (renderer, position, spaceship)) in &mut world.query::<(&Renderer, &Position, &SpaceShip)>() {
+            let position = Position {
+                x: position.x + camera.offset.x,
+                y: position.y + camera.offset.y,
+            };
+            context.save();
+
+            context.translate(position.x, position.y).unwrap();
+            context.rotate(spaceship.angle-std::f64::consts::FRAC_PI_2).unwrap();
+            let sprite_position = Position {
+                x: -(37.2)/2.0,
+                y: -(58.0)/2.0,
+            };
+            renderer.paint(&context, &sprite_position, &store);
+
+            context.restore();
+        }
     }
 }
