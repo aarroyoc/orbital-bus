@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1566"
+   sodipodi:docname="controls.svg"
+   inkscape:export-filename="/home/aarroyoc/dev/orbital-bus/public/controls.png"
+   inkscape:export-xdpi="19.969999"
+   inkscape:export-ydpi="19.969999"
+   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)">
+  <defs
+     id="defs1560" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.66"
+     inkscape:cx="393.93939"
+     inkscape:cy="469.45459"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1297"
+     inkscape:window-height="704"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1">
+    <sodipodi:guide
+       position="103.82891,198.38258"
+       orientation="1,0"
+       id="guide2148" />
+    <sodipodi:guide
+       position="103.82891,198.38259"
+       orientation="0,-1"
+       id="guide2150" />
+    <sodipodi:guide
+       position="103.82891,109.78725"
+       orientation="0,-1"
+       id="guide2156" />
+    <sodipodi:guide
+       position="103.82891,135.8447"
+       orientation="0,-1"
+       id="guide2158" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata1563">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#999999;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stop-color:#000000"
+       id="rect2129"
+       width="134.55409"
+       height="102.92576"
+       x="38.780945"
+       y="45.448685"
+       rx="20.000013"
+       ry="20" />
+    <rect
+       style="fill:#b3b3b3;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stop-color:#000000;stroke-miterlimit:4;stroke-dasharray:none"
+       id="rect2129-3"
+       width="135.17628"
+       height="48.622196"
+       x="38.469845"
+       y="148.06335"
+       rx="20"
+       ry="20" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2.95073;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 45.199101,117.96373 58.629809,-58.629798 58.6298,58.629798"
+       id="path2152" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2.95073;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 71.976085,117.96373 103.82891,86.110911 135.68172,117.96373"
+       id="path2154" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="M 73.261521,161.1553 103.82891,191.72269 134.3963,161.1553"
+       id="path2160" />
+  </g>
+</svg>

@@ -22,6 +22,7 @@ use web::*;
 struct SpaceShip {
     angle: f64,
     fuel: f64,
+    initial_fuel: f64,
 }
 
 struct EndZone {
@@ -147,7 +148,8 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         };
         let spaceship = SpaceShip {
             angle: 0.0,
-            fuel: 100.0,
+            fuel: 25.0,
+            initial_fuel: 25.0
         };
         world.spawn((renderer, position, velocity, spaceship));
     }
@@ -192,9 +194,26 @@ pub fn start() {
 
     let input = Rc::new(RefCell::new(Input::default()));
     let input_handler = input.clone();
-    let click_handler = Closure::wrap(Box::new(move ||{
+    let forwarddown_handler = Closure::wrap(Box::new(move ||{
         let mut input = input_handler.borrow_mut();
-        input.forward = !input.forward;
+        input.forward = true;
+    }) as Box<dyn Fn()>);
+    let input_handler = input.clone();
+    let forwardup_handler = Closure::wrap(Box::new(move ||{
+        let mut input = input_handler.borrow_mut();
+        input.forward = false;
+    }) as Box<dyn Fn()>);
+
+    let input_handler = input.clone();
+    let brakedown_handler = Closure::wrap(Box::new(move ||{
+        let mut input = input_handler.borrow_mut();
+        input.brake = true;
+    }) as Box<dyn Fn()>);
+
+    let input_handler = input.clone();
+    let brakeup_handler = Closure::wrap(Box::new(move ||{
+        let mut input = input_handler.borrow_mut();
+        input.brake = false;
     }) as Box<dyn Fn()>);
 
     let input_handler = input.clone();
@@ -221,9 +240,19 @@ pub fn start() {
 
     window().set_onkeydown(Some(keydown_handler.as_ref().unchecked_ref()));
     window().set_onkeyup(Some(keyup_handler.as_ref().unchecked_ref()));
-    click_handler.forget();
+    let controls = document().get_element_by_id("controls-forward").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap();
+    controls.set_onmousedown(Some(forwarddown_handler.as_ref().unchecked_ref()));
+    controls.set_onmouseup(Some(forwardup_handler.as_ref().unchecked_ref()));
+    let controls = document().get_element_by_id("controls-brake").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap();
+    controls.set_onmousedown(Some(brakedown_handler.as_ref().unchecked_ref()));
+    controls.set_onmouseup(Some(brakeup_handler.as_ref().unchecked_ref()));
+
     keydown_handler.forget();
     keyup_handler.forget();
+    forwarddown_handler.forget();
+    forwardup_handler.forget();
+    brakedown_handler.forget();
+    brakeup_handler.forget();
     
     let ginput = input.clone();
     let now = Instant::now();
