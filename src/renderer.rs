@@ -86,6 +86,33 @@ impl Renderer {
             fixed: false
         }
     }
+    fn get_width(&self, store: &ImageStore) -> Option<u32> {
+        match self {
+            Renderer::SpriteRenderer{image, ..} => {
+                let img = store.get(image);
+                img.and_then(|img|{
+                    Some(img.width())
+                })
+            },
+            _ => None
+        }
+    }
+    fn get_height(&self, store: &ImageStore) -> Option<u32> {
+        match self {
+            Renderer::SpriteRenderer{image, ..} => {
+                let img = store.get(image);
+                img.and_then(|img|{
+                    Some(img.height())
+                })
+            },
+            _ => None
+        }
+    }
+    fn get_dimensions(&self, store: &ImageStore) -> Option<(u32, u32)> {
+        let width = self.get_width(store);
+        let height = self.get_height(store);
+        width.zip(height)
+    }
     pub fn set_z(&mut self, new_z: i32) {
         match self {
             Renderer::CircleRenderer{z, ..} => *z = new_z,
@@ -177,11 +204,24 @@ pub fn system_renderer<'a>(world: &mut World, context: &web_sys::CanvasRendering
                 if renderer.is_fixed() {
                     renderer.paint(&context, &position, &store);
                 } else {
+                    context.save();
                     let position = Position {
                         x: position.x + camera.offset.x,
                         y: position.y + camera.offset.y,
                     };
-                    renderer.paint(&context, &position, &store);
+                    context.translate(position.x, position.y).unwrap();
+                    if let Some((width, height)) = renderer.get_dimensions(&store) {
+                        let width = width as f64;
+                        let height = height as f64;
+                        let position = Position {
+                            x: -(width)/2.0,
+                            y: -(height)/2.0,
+                        };
+                        renderer.paint(&context, &position, &store);
+                    } else {
+                        renderer.paint(&context, &Position { x: 0.0, y: 0.0}, &store);
+                    }
+                    context.restore();
                 }
         });
         for (_id, (renderer, position, spaceship)) in &mut world.query::<(&Renderer, &Position, &SpaceShip)>() {

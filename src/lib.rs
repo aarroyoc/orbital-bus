@@ -26,21 +26,33 @@ struct EndZone {
     height: f64,
 }
 
+struct Finish {
+    finish: bool,
+}
+
 fn system_finish(world: &mut World) {
     let mut show_win = false;
-    for (_id, position) in &mut world.query::<With<SpaceShip, &Position>>() {
-        for (_id, (zone_limits, zone_position)) in &mut world.query::<(&EndZone, &Position)>(){
-            if zone_position.x+20.0 < position.x && position.x < zone_position.x+zone_limits.width-20.0 {
-                if zone_position.y+20.0 < position.y && position.y < zone_position.y + zone_limits.height-20.0 {
-                    show_win = true;
+    for (_id, finish) in &mut world.query::<&mut Finish>(){
+        if !finish.finish {
+            for (_id, position) in &mut world.query::<With<SpaceShip, &Position>>() {
+                for (_id, (zone_limits, zone_position)) in &mut world.query::<(&EndZone, &Position)>(){
+                    if zone_position.x+20.0 < position.x && position.x < zone_position.x+zone_limits.width-20.0 {
+                        if zone_position.y+20.0 < position.y && position.y < zone_position.y + zone_limits.height-20.0 {
+                            finish.finish = true;
+                            show_win = true;
+                        }
+                    }
                 }
             }
         }
     }
+    
     if show_win {
-        let renderer = Renderer::text(String::from("¡Victoria!"), "black", "20pt arial");
+        let mut renderer = Renderer::text(String::from("¡Victoria!"), "white", "20pt arial");
+        renderer.set_fixed(true);
+        renderer.set_z(10);
         let position = Position {
-            x: 550.0,
+            x: 590.0,
             y: 200.0,
         };
         world.spawn((renderer, position));
@@ -60,7 +72,7 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         world.spawn((renderer, position));
     }
     {
-        let renderer = Renderer::circle(100.0, "#ff0000");
+        let renderer = Renderer::sprite("earth.png", &mut store);
         let position = Position {
             x: 650.0,
             y: 400.0,
@@ -70,14 +82,14 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         };
         world.spawn((renderer, position, mass));
     }
-    {
+    /*{
         let renderer = Renderer::rect(50.0, 50.0, "rgba(102, 145, 209, 0.7)");
         let position = Position {
             x: 800.0-25.0,
             y: 400.0-25.0,
         };
         world.spawn((renderer, position));
-    }
+    }*/
     {
         let renderer = Renderer::rect(100.0, 100.0, "rgba(250, 126, 55, 0.7)");
         let position = Position {
@@ -91,9 +103,11 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         world.spawn((renderer, position, end));
     }
     {
-        let renderer = Renderer::text(String::from("Desplázate hasta el cuadrado naranja"), "black", "16pt arial");
+        let mut renderer = Renderer::text(String::from("Desplázate hasta el cuadrado naranja"), "white", "16pt arial");
+        renderer.set_fixed(true);
+        renderer.set_z(10);
         let position = Position {
-            x: 550.0,
+            x: 480.0,
             y: 100.0,
         };
         world.spawn((renderer, position));
@@ -106,7 +120,7 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         };
         let velocity = Velocity {
             x: 0.0,
-            y: 500.0
+            y: 300.0
         };
         let spaceship = SpaceShip {
             angle: 0.0
@@ -121,6 +135,12 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
             }
         };
         world.spawn((camera,));
+    }
+    {
+        let finish = Finish {
+            finish: false
+        };
+        world.spawn((finish,));
     }
     world
 }
