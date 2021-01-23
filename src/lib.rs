@@ -9,16 +9,19 @@ use hecs::*;
 
 mod dynamics;
 mod input;
+mod hud;
 mod renderer;
 mod web;
 
 use input::*;
 use dynamics::*;
+use hud::*;
 use renderer::*;
 use web::*;
 
 struct SpaceShip {
-    angle: f64
+    angle: f64,
+    fuel: f64,
 }
 
 struct EndZone {
@@ -82,14 +85,6 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         };
         world.spawn((renderer, position, mass));
     }
-    /*{
-        let renderer = Renderer::rect(50.0, 50.0, "rgba(102, 145, 209, 0.7)");
-        let position = Position {
-            x: 800.0-25.0,
-            y: 400.0-25.0,
-        };
-        world.spawn((renderer, position));
-    }*/
     {
         let renderer = Renderer::rect(100.0, 100.0, "rgba(250, 126, 55, 0.7)");
         let position = Position {
@@ -113,6 +108,34 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
         world.spawn((renderer, position));
     }
     {
+        let mut renderer = Renderer::sprite("hud.png", &mut store);
+        renderer.set_fixed(true);
+        renderer.set_z(8);
+        let position = Position {
+            x: 1230.0,
+            y: 630.0,
+        };
+        world.spawn((renderer, position));
+
+        let mut renderer = Renderer::sprite("can.png", &mut store);
+        renderer.set_fixed(true);
+        renderer.set_z(10);
+        let position = Position {
+            x: 1250.0,
+            y: 650.0,
+        };
+        world.spawn((renderer, position));
+
+        let mut renderer = Renderer::rect(77.0, 96.0, "red");
+        renderer.set_fixed(true);
+        renderer.set_z(9);
+        let position = Position {
+            x: 1252.0,
+            y: 653.0,
+        };
+        world.spawn((renderer, position, FuelHUD));
+    }
+    {
         let renderer = Renderer::sprite("spaceship.png", &mut store);
         let position = Position {
             x: 800.0,
@@ -123,7 +146,8 @@ fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement
             y: 300.0
         };
         let spaceship = SpaceShip {
-            angle: 0.0
+            angle: 0.0,
+            fuel: 100.0,
         };
         world.spawn((renderer, position, velocity, spaceship));
     }
@@ -220,6 +244,7 @@ pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc
             system_spacecraft_input(&mut world, &input, delta);
             system_gravity(&mut world, delta);
             system_finish(&mut world);
+            system_hud(&mut world);
             system_offset(&mut world);
             system_renderer(&mut world, &context, &store);
         }
