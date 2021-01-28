@@ -1,0 +1,48 @@
+@font-face {
+    font-family: 'Subatomic Tsoonami';
+    src: url("subatomic.tsoonami.ttf") format("truetype");
+}
+
+
+body{
+    margin: 0;
+    padding: 0;
+    background-image: url("space.png");
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: whitesmoke;
+    font-family: "Subatomic Tsoonami";
+}
+#grid{
+    display: grid;
+    grid-template-columns: repeat(5, 10vw);
+    grid-auto-rows: 10vw;
+    gap: 1vw;
+    margin-left: 22vw;
+    margin-right: 22vw;
+}
+
+#grid > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24pt;
+    border-radius: 12px;
+}
+
+.disabled {
+    border: 10px solid rgb(58, 58, 58);
+    color: rgb(58, 58, 58);
+}
+
+.enabled{
+    border: 10px solid white;
+    cursor: pointer;
+    color: whitesmoke;
+}
+
+.link{
+    color: whitesmoke;
+}

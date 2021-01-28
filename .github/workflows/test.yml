@@ -21,7 +21,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: wasm-bindgen-cli --version 0.2.69
+          args: wasm-bindgen-cli --version 0.2.70
       - name: Build
         run: make
       
