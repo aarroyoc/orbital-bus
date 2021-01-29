@@ -20,3 +20,17 @@ where
         .request_animation_frame(&closure)
         .expect("should register `requestAnimationFrame` OK");
 }
+
+pub fn set_local_storage(key: &str, value: &str) {
+    let storage = window().local_storage().expect("no 'localStorage' found").unwrap();
+    storage.set_item(key, value).unwrap();
+}
+
+pub fn get_local_storage(key: &str) -> String {
+    let storage = window().local_storage().expect("no 'localStorage' found").unwrap();
+    storage.get_item(key).unwrap().unwrap()
+}
+
+pub fn go_web(url: &str) {
+    window().location().set_href(url).expect("error in 'window.location.href'");
+}

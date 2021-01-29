@@ -1,8 +1,4 @@
-@font-face {
-    font-family: 'Subatomic Tsoonami';
-    src: url("subatomic.tsoonami.ttf") format("truetype");
-}
-
+@import "fonts.css";
 
 body{
     margin: 0;
@@ -13,7 +9,7 @@ body{
     justify-content: center;
     align-items: center;
     color: whitesmoke;
-    font-family: "Subatomic Tsoonami";
+    font-family: "Tsoonami";
 }
 #grid{
     display: grid;

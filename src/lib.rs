@@ -10,6 +10,7 @@ use hecs::*;
 mod dynamics;
 mod input;
 mod hud;
+mod levels;
 mod renderer;
 mod web;
 
@@ -34,7 +35,12 @@ struct Finish {
     finish: bool,
 }
 
-fn system_finish(world: &mut World) {
+const KEY_W: u32 = 87;
+const KEY_S: u32 = 83;
+const ORBITAL_BUS_LEVEL: &'static str = "orbital-bus-level";
+const ORBITAL_BUS_MAX_LEVEL: &'static str = "orbital-bus-max-level";
+
+fn system_finish(world: &mut World, mut input: &mut Input) {
     let mut show_win = false;
     for (_id, finish) in &mut world.query::<&mut Finish>(){
         if !finish.finish {
@@ -44,135 +50,46 @@ fn system_finish(world: &mut World) {
                         if zone_position.y+20.0 < position.y && position.y < zone_position.y + zone_limits.height-20.0 {
                             finish.finish = true;
                             show_win = true;
+                            input.click = false;
                         }
                     }
                 }
             }
+        } else if input.click {
+            let level: i32 = get_local_storage(ORBITAL_BUS_LEVEL).parse().unwrap();
+            let new_level = format!("{}", level + 1);
+            set_local_storage(ORBITAL_BUS_MAX_LEVEL, &new_level);
+            go_web("index.html");
+            input.click = false;
         }
     }
     
     if show_win {
-        let mut renderer = Renderer::text(String::from("¡Victoria!"), "white", "20pt arial");
-        renderer.set_fixed(true);
-        renderer.set_z(10);
+        let mut rect = Renderer::rect(230.0, 75.0, "#1b1b1b");
+        rect.set_fixed(true);
+        rect.set_z(9);
+        let mut text = Renderer::text(String::from("Success!"), "white", "40px Tsoonami");
+        text.set_fixed(true);
+        text.set_z(10);
+        let mut click_text = Renderer::text(String::from("Click to continue"), "white", "14px Tsoonami");
+        click_text.set_fixed(true);
+        click_text.set_z(10);
         let position = Position {
             x: 590.0,
-            y: 200.0,
+            y: 350.0,
         };
-        world.spawn((renderer, position));
+        let mut p = position.clone();
+        p.x -= 5.0;
+        p.y -= 40.0;
+        let mut t = position.clone();
+        t.x += 20.0;
+        t.y += 25.0;
+        world.spawn((text, position));
+        world.spawn((rect, p));
+        world.spawn((click_text, t));
+
     }
 }
-
-fn world_level_1(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement>) -> World {
-    let mut world = World::new();
-    {
-        let mut renderer = Renderer::sprite("space.png", &mut store);
-        renderer.set_z(-100);
-        renderer.set_fixed(true);
-        let position = Position {
-            x: 0.0,
-            y: 0.0,
-        };
-        world.spawn((renderer, position));
-    }
-    {
-        let renderer = Renderer::sprite("earth.png", &mut store);
-        let position = Position {
-            x: 650.0,
-            y: 400.0,
-        };
-        let mass = Mass {
-            mass: 5.0
-        };
-        world.spawn((renderer, position, mass));
-    }
-    {
-        let renderer = Renderer::rect(100.0, 100.0, "rgba(250, 126, 55, 0.7)");
-        let position = Position {
-            x: 1100.0-50.0,
-            y: 400.0-50.0,
-        };
-        let end = EndZone {
-            width: 100.0,
-            height: 100.0,
-        };
-        world.spawn((renderer, position, end));
-    }
-    {
-        let mut renderer = Renderer::text(String::from("Desplázate hasta el cuadrado naranja"), "white", "16pt arial");
-        renderer.set_fixed(true);
-        renderer.set_z(10);
-        let position = Position {
-            x: 480.0,
-            y: 100.0,
-        };
-        world.spawn((renderer, position));
-    }
-    {
-        let mut renderer = Renderer::sprite("hud.png", &mut store);
-        renderer.set_fixed(true);
-        renderer.set_z(8);
-        let position = Position {
-            x: 1230.0,
-            y: 630.0,
-        };
-        world.spawn((renderer, position));
-
-        let mut renderer = Renderer::sprite("can.png", &mut store);
-        renderer.set_fixed(true);
-        renderer.set_z(10);
-        let position = Position {
-            x: 1250.0,
-            y: 650.0,
-        };
-        world.spawn((renderer, position));
-
-        let mut renderer = Renderer::rect(77.0, 96.0, "red");
-        renderer.set_fixed(true);
-        renderer.set_z(9);
-        let position = Position {
-            x: 1252.0,
-            y: 653.0,
-        };
-        world.spawn((renderer, position, FuelHUD));
-    }
-    {
-        let renderer = Renderer::sprite("spaceship.png", &mut store);
-        let position = Position {
-            x: 800.0,
-            y: 400.0,
-        };
-        let velocity = Velocity {
-            x: 0.0,
-            y: 300.0
-        };
-        let spaceship = SpaceShip {
-            angle: 0.0,
-            fuel: 25.0,
-            initial_fuel: 25.0
-        };
-        world.spawn((renderer, position, velocity, spaceship));
-    }
-    {
-        let camera = Camera {
-            offset: Position {
-                x: 0.0,
-                y: 0.0,
-            }
-        };
-        world.spawn((camera,));
-    }
-    {
-        let finish = Finish {
-            finish: false
-        };
-        world.spawn((finish,));
-    }
-    world
-}
-
-const KEY_W: u32 = 87;
-const KEY_S: u32 = 83;
 
 #[wasm_bindgen(start)]
 pub fn start() {
@@ -190,9 +107,15 @@ pub fn start() {
         .unwrap();
 
     let mut store = HashMap::new();
-    let world = world_level_1(&mut store);
+    let level: i32 = get_local_storage(ORBITAL_BUS_LEVEL).parse().expect("orbital-bus-level is not a number");
+    let world = levels::load_level(level, &mut store);
 
     let input = Rc::new(RefCell::new(Input::default()));
+    let input_handler = input.clone();
+    let click_handler = Closure::wrap(Box::new(move ||{
+        let mut input = input_handler.borrow_mut();
+        input.click = true;
+    }) as Box<dyn Fn()>);
     let input_handler = input.clone();
     let forwarddown_handler = Closure::wrap(Box::new(move ||{
         let mut input = input_handler.borrow_mut();
@@ -238,6 +161,7 @@ pub fn start() {
         };
     }) as Box<dyn Fn(_)>);
 
+    window().set_onclick(Some(click_handler.as_ref().unchecked_ref()));
     window().set_onkeydown(Some(keydown_handler.as_ref().unchecked_ref()));
     window().set_onkeyup(Some(keyup_handler.as_ref().unchecked_ref()));
     let controls = document().get_element_by_id("controls-forward").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap();
@@ -247,6 +171,7 @@ pub fn start() {
     controls.set_onmousedown(Some(brakedown_handler.as_ref().unchecked_ref()));
     controls.set_onmouseup(Some(brakeup_handler.as_ref().unchecked_ref()));
 
+    click_handler.forget();
     keydown_handler.forget();
     keyup_handler.forget();
     forwarddown_handler.forget();
@@ -268,11 +193,11 @@ pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc
     let delta = now.duration_since(prev).as_secs_f64();
     {
         if delta < 0.1 {
-            let input = input.borrow();
+            let mut input = input.borrow_mut();
 
             system_spacecraft_input(&mut world, &input, delta);
             system_gravity(&mut world, delta);
-            system_finish(&mut world);
+            system_finish(&mut world, &mut input);
             system_hud(&mut world);
             system_offset(&mut world);
             system_renderer(&mut world, &context, &store);

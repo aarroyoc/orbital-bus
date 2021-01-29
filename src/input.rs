@@ -11,6 +11,7 @@ const SPEED_DECREMENT: f64 = 600.0;
 pub struct Input {
     pub forward: bool,
     pub brake: bool,
+    pub click: bool,
 }
 
 pub fn system_spacecraft_input(world: &mut World, input: &Input, delta: f64) {

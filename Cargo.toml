@@ -27,7 +27,9 @@ features = [
   'Window',
   'EventTarget',
   'Event',
-  'KeyboardEvent'
+  'KeyboardEvent',
+  'Storage',
+  'Location'
 ]
 
 [profile.release.package.'*']
