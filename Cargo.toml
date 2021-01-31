@@ -29,7 +29,13 @@ features = [
   'Event',
   'KeyboardEvent',
   'Storage',
-  'Location'
+  'Location',
+  'DomRect',
+  'MouseEvent',
+  'console',
+  'TouchEvent',
+  'TouchList',
+  'Touch'
 ]
 
 [profile.release.package.'*']

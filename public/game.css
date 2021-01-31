@@ -21,17 +21,3 @@ body {
         display: none;
     }
 }
-
-@media (orientation: portrait) {
-    canvas {
-        display: none;
-    }
-}
-
-.controls{
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    bottom: 15px;
-    left: 15px;
-}

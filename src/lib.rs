@@ -57,8 +57,11 @@ fn system_finish(world: &mut World, mut input: &mut Input) {
             }
         } else if input.click {
             let level: i32 = get_local_storage(ORBITAL_BUS_LEVEL).parse().unwrap();
-            let new_level = format!("{}", level + 1);
-            set_local_storage(ORBITAL_BUS_MAX_LEVEL, &new_level);
+            let max_level: i32 = get_local_storage(ORBITAL_BUS_MAX_LEVEL).parse().unwrap();
+            if max_level == level {
+                let new_level = format!("{}", level + 1);
+                set_local_storage(ORBITAL_BUS_MAX_LEVEL, &new_level);
+            }
             go_web("index.html");
             input.click = false;
         }
@@ -93,6 +96,7 @@ fn system_finish(world: &mut World, mut input: &mut Input) {
 
 #[wasm_bindgen(start)]
 pub fn start() {
+    log("Welcome to Orbital Bus!");
     let canvas = document().get_element_by_id("canvas").unwrap();
     let canvas: web_sys::HtmlCanvasElement = canvas
         .dyn_into::<web_sys::HtmlCanvasElement>()
@@ -112,32 +116,83 @@ pub fn start() {
 
     let input = Rc::new(RefCell::new(Input::default()));
     let input_handler = input.clone();
-    let click_handler = Closure::wrap(Box::new(move ||{
+    let click_handler = Closure::wrap(Box::new(move |event: web_sys::MouseEvent|{
         let mut input = input_handler.borrow_mut();
-        input.click = true;
-    }) as Box<dyn Fn()>);
+        let canvas = document().get_element_by_id("canvas").unwrap().dyn_into::<web_sys::HtmlCanvasElement>().unwrap();
+        let (x, y) = get_position(canvas, event);
+        if y > 10.0 && y < 210.0 {
+            if x > 10.0 && x < 110.0 {
+                go_web("index.html");
+            }
+            if x > 110.0 && x < 210.0 {
+                window().location().reload().unwrap();
+            }
+        } else {
+            input.click = true;
+        }
+    }) as Box<dyn Fn(_)>);
     let input_handler = input.clone();
-    let forwarddown_handler = Closure::wrap(Box::new(move ||{
+    let down_handler = Closure::wrap(Box::new(move |event|{
         let mut input = input_handler.borrow_mut();
-        input.forward = true;
-    }) as Box<dyn Fn()>);
+        let canvas = document().get_element_by_id("canvas").unwrap().dyn_into::<web_sys::HtmlCanvasElement>().unwrap();
+        let (x, y) = get_position(canvas, event);
+        if x > 10.0 && x < 260.0 {
+            if y > 500.0 && y < 692.0 {
+                input.forward = true;
+            }
+            if y > 692.0 && y < 784.0 {
+                input.brake = true;
+            }
+        }
+        let msg = format!("Pos: {}, {}", x, y);
+        log(&msg);
+    }) as Box<dyn Fn(_)>);
     let input_handler = input.clone();
-    let forwardup_handler = Closure::wrap(Box::new(move ||{
+    let up_handler = Closure::wrap(Box::new(move |event|{
+        let mut input = input_handler.borrow_mut();
+        let canvas = document().get_element_by_id("canvas").unwrap().dyn_into::<web_sys::HtmlCanvasElement>().unwrap();
+        let (x, y) = get_position(canvas, event);
+        if x > 10.0 && x < 260.0 {
+            if y > 500.0 && y < 692.0 {
+                input.forward = false;
+            }
+            if y > 692.0 && y < 784.0 {
+                input.brake = false;
+            }
+        }
+        let msg = format!("Pos: {}, {}", x, y);
+        log(&msg);
+    }) as Box<dyn Fn(_)>);
+
+    let input_handler = input.clone();
+    let touchstart_handler = Closure::wrap(Box::new(move |event: web_sys::TouchEvent|{
+        let mut input = input_handler.borrow_mut();
+        let canvas = document().get_element_by_id("canvas").unwrap().dyn_into::<web_sys::HtmlCanvasElement>().unwrap();
+        let (x, y) = get_touch_position(canvas, event);
+        if x > 10.0 && x < 260.0 {
+            if y > 500.0 && y < 692.0 {
+                input.forward = true;
+            }
+            if y > 692.0 && y < 784.0 {
+                input.brake = true;
+            }
+        }
+        let msg = format!("Pos: {}, {}", x, y);
+        log(&msg);
+        
+    }) as Box<dyn Fn(_)>);
+
+    let input_handler = input.clone();
+    let touchend_handler = Closure::wrap(Box::new(move ||{
         let mut input = input_handler.borrow_mut();
         input.forward = false;
-    }) as Box<dyn Fn()>);
-
-    let input_handler = input.clone();
-    let brakedown_handler = Closure::wrap(Box::new(move ||{
-        let mut input = input_handler.borrow_mut();
-        input.brake = true;
-    }) as Box<dyn Fn()>);
-
-    let input_handler = input.clone();
-    let brakeup_handler = Closure::wrap(Box::new(move ||{
-        let mut input = input_handler.borrow_mut();
         input.brake = false;
     }) as Box<dyn Fn()>);
+
+    let contextmenu_handler = Closure::wrap(Box::new(move |event: web_sys::Event|{
+        event.prevent_default();
+        event.stop_propagation();
+    }) as Box<dyn Fn(_)>);
 
     let input_handler = input.clone();
     let keydown_handler = Closure::wrap(Box::new(move |event: web_sys::Event|{
@@ -164,21 +219,21 @@ pub fn start() {
     window().set_onclick(Some(click_handler.as_ref().unchecked_ref()));
     window().set_onkeydown(Some(keydown_handler.as_ref().unchecked_ref()));
     window().set_onkeyup(Some(keyup_handler.as_ref().unchecked_ref()));
-    let controls = document().get_element_by_id("controls-forward").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap();
-    controls.set_onmousedown(Some(forwarddown_handler.as_ref().unchecked_ref()));
-    controls.set_onmouseup(Some(forwardup_handler.as_ref().unchecked_ref()));
-    let controls = document().get_element_by_id("controls-brake").unwrap().dyn_into::<web_sys::HtmlElement>().unwrap();
-    controls.set_onmousedown(Some(brakedown_handler.as_ref().unchecked_ref()));
-    controls.set_onmouseup(Some(brakeup_handler.as_ref().unchecked_ref()));
+    canvas.set_onmousedown(Some(down_handler.as_ref().unchecked_ref()));
+    canvas.set_onmouseup(Some(up_handler.as_ref().unchecked_ref()));
+    canvas.set_ontouchstart(Some(touchstart_handler.as_ref().unchecked_ref()));
+    canvas.set_ontouchend(Some(touchend_handler.as_ref().unchecked_ref()));
+    canvas.set_oncontextmenu(Some(contextmenu_handler.as_ref().unchecked_ref()));
 
     click_handler.forget();
     keydown_handler.forget();
     keyup_handler.forget();
-    forwarddown_handler.forget();
-    forwardup_handler.forget();
-    brakedown_handler.forget();
-    brakeup_handler.forget();
-    
+    down_handler.forget();
+    up_handler.forget();
+    touchstart_handler.forget();
+    touchend_handler.forget();
+    contextmenu_handler.forget();
+
     let ginput = input.clone();
     let now = Instant::now();
     request_animation_frame(move ||{

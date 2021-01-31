@@ -80,7 +80,10 @@
        x="38.780945"
        y="45.448685"
        rx="20.000013"
-       ry="20" />
+       ry="20"
+       inkscape:export-filename="/home/aarroyoc/dev/orbital-bus/public/controls-forward.png"
+       inkscape:export-xdpi="19.969999"
+       inkscape:export-ydpi="19.969999" />
     <rect
        style="fill:#b3b3b3;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;stop-color:#000000;stroke-miterlimit:4;stroke-dasharray:none"
        id="rect2129-3"
@@ -89,7 +92,10 @@
        x="38.469845"
        y="148.06335"
        rx="20"
-       ry="20" />
+       ry="20"
+       inkscape:export-filename="/home/aarroyoc/dev/orbital-bus/public/controls-brake.png"
+       inkscape:export-xdpi="19.969999"
+       inkscape:export-ydpi="19.969999" />
     <path
        style="fill:none;stroke:#000000;stroke-width:2.95073;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 45.199101,117.96373 58.629809,-58.629798 58.6298,58.629798"

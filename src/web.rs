@@ -34,3 +34,28 @@ pub fn get_local_storage(key: &str) -> String {
 pub fn go_web(url: &str) {
     window().location().set_href(url).expect("error in 'window.location.href'");
 }
+
+pub fn get_position(canvas: web_sys::HtmlCanvasElement, event: web_sys::MouseEvent) -> (f64, f64) {
+    let rect = canvas.get_bounding_client_rect();
+    let scale_x = canvas.width() as f64 / rect.width();
+    let scale_y = canvas.height() as f64 / rect.height();
+    (
+        (event.client_x() as f64 - rect.left()) * scale_x,
+        (event.client_y() as f64 - rect.top()) * scale_y
+    )
+}
+
+pub fn get_touch_position(canvas: web_sys::HtmlCanvasElement, event: web_sys::TouchEvent) -> (f64, f64) {
+    let rect = canvas.get_bounding_client_rect();
+    let scale_x = canvas.width() as f64 / rect.width();
+    let scale_y = canvas.height() as f64 / rect.height();
+    let touch = event.touches().get(0).unwrap();
+    (
+        (touch.page_x() as f64 - rect.left()) * scale_x,
+        (touch.page_y() as f64 - rect.top()) * scale_y
+    )
+}
+
+pub fn log(msg: &str) {
+    web_sys::console::log_1(&JsValue::from_str(msg));
+}

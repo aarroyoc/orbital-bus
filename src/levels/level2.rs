@@ -42,46 +42,6 @@ pub fn world_level(mut store: &mut HashMap<&'static str, web_sys::HtmlImageEleme
         world.spawn((renderer, position, end));
     }
     {
-        let mut renderer = Renderer::text(String::from("Welcome to Orbital Bus"), "white", "20pt Tsoonami");
-        renderer.set_fixed(true);
-        renderer.set_z(10);
-        let position = Position {
-            x: 480.0,
-            y: 100.0,
-        };
-        world.spawn((renderer, position));
-    }
-    {
-        let mut renderer = Renderer::text(String::from("The objective is simple. Try to go to the square zone"), "white", "15pt Tsoonami");
-        renderer.set_fixed(true);
-        renderer.set_z(10);
-        let position = Position {
-            x: 370.0,
-            y: 130.0
-        };
-        world.spawn((renderer, position));
-    }
-    {
-        let mut renderer = Renderer::text(String::from("Use the keys (W,S) or the on-screen buttons to accelerate and brake"), "white", "15pt Tsoonami");
-        renderer.set_fixed(true);
-        renderer.set_z(10);
-        let position = Position {
-            x: 280.0,
-            y: 150.0,
-        };
-        world.spawn((renderer, position));
-    }
-    {
-        let mut renderer = Renderer::text(String::from("Be careful! You have limited fuel"), "white", "15pt Tsoonami");
-        renderer.set_fixed(true);
-        renderer.set_z(10);
-        let position = Position {
-            x: 470.0,
-            y: 170.0
-        };
-        world.spawn((renderer, position));
-    }
-    {
         let renderer = Renderer::sprite("spaceship.png", &mut store);
         let position = Position {
             x: 800.0,
@@ -93,10 +53,11 @@ pub fn world_level(mut store: &mut HashMap<&'static str, web_sys::HtmlImageEleme
         };
         let spaceship = SpaceShip {
             angle: 0.0,
-            fuel: 25.0,
-            initial_fuel: 25.0
+            fuel: 10.0,
+            initial_fuel: 10.0
         };
         world.spawn((renderer, position, velocity, spaceship));
     }
+    crate::hud::build_hud(&mut world, &mut store);
     world
 }

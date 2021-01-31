@@ -6,3 +6,9 @@ all:
 .PHONY: server
 server:
 	cd public && python3 -m http.server
+
+.PHONY: upload
+upload:
+	cargo build --target wasm32-unknown-unknown --release
+	wasm-bindgen --out-dir public --target web target/wasm32-unknown-unknown/release/orbital_bus.wasm
+	netlifyctl deploy
