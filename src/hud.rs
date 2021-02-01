@@ -78,9 +78,7 @@ pub fn build_hud(world: &mut World, mut store: &mut HashMap<&'static str, web_sy
         world.spawn((camera,));
     }
     {
-        let finish = Finish {
-            finish: false
-        };
+        let finish = Finish::default();
         world.spawn((finish,));
     }
 }

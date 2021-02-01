@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
-use hecs::{World, With, Without};
+use hecs::{World, With};
 use itertools::Itertools;
 
 use crate::SpaceShip;

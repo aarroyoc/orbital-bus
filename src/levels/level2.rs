@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use hecs::World;
 
-use crate::dynamics::{Mass, Position, Velocity};
+use crate::dynamics::{Celestial, Position, Velocity};
 use crate::renderer::{Renderer};
 use crate::{EndZone, SpaceShip};
 
@@ -24,10 +24,11 @@ pub fn world_level(mut store: &mut HashMap<&'static str, web_sys::HtmlImageEleme
             x: 650.0,
             y: 400.0,
         };
-        let mass = Mass {
-            mass: 5.0
+        let planet = Celestial {
+            mass: 5.0,
+            radius: 100.0,
         };
-        world.spawn((renderer, position, mass));
+        world.spawn((renderer, position, planet));
     }
     {
         let renderer = Renderer::rect(100.0, 100.0, "rgba(250, 126, 55, 0.7)");

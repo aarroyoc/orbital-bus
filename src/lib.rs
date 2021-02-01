@@ -31,8 +31,10 @@ struct EndZone {
     height: f64,
 }
 
+#[derive(Default)]
 struct Finish {
     finish: bool,
+    crash: bool,
 }
 
 const KEY_W: u32 = 87;
@@ -42,6 +44,7 @@ const ORBITAL_BUS_MAX_LEVEL: &'static str = "orbital-bus-max-level";
 
 fn system_finish(world: &mut World, mut input: &mut Input) {
     let mut show_win = false;
+    let mut show_crash = false;
     for (_id, finish) in &mut world.query::<&mut Finish>(){
         if !finish.finish {
             for (_id, position) in &mut world.query::<With<SpaceShip, &Position>>() {
@@ -55,7 +58,12 @@ fn system_finish(world: &mut World, mut input: &mut Input) {
                     }
                 }
             }
-        } else if input.click {
+            if finish.crash {
+                finish.finish = true;
+                show_crash = true;
+                input.click = false;
+            }
+        } else if input.click && !finish.crash {
             let level: i32 = get_local_storage(ORBITAL_BUS_LEVEL).parse().unwrap();
             let max_level: i32 = get_local_storage(ORBITAL_BUS_MAX_LEVEL).parse().unwrap();
             if max_level == level {
@@ -63,6 +71,9 @@ fn system_finish(world: &mut World, mut input: &mut Input) {
                 set_local_storage(ORBITAL_BUS_MAX_LEVEL, &new_level);
             }
             go_web("index.html");
+            input.click = false;
+        } else if input.click {
+            window().location().reload().unwrap();
             input.click = false;
         }
     }
@@ -90,7 +101,31 @@ fn system_finish(world: &mut World, mut input: &mut Input) {
         world.spawn((text, position));
         world.spawn((rect, p));
         world.spawn((click_text, t));
+    }
 
+    if show_crash {
+        let mut rect = Renderer::rect(230.0, 75.0, "#1b1b1b");
+        rect.set_fixed(true);
+        rect.set_z(9);
+        let mut text = Renderer::text(String::from("Crash..!"), "white", "40px Tsoonami");
+        text.set_fixed(true);
+        text.set_z(10);
+        let mut click_text = Renderer::text(String::from("Click to restart"), "white", "14px Tsoonami");
+        click_text.set_fixed(true);
+        click_text.set_z(10);
+        let position = Position {
+            x: 590.0,
+            y: 350.0,
+        };
+        let mut p = position.clone();
+        p.x -= 5.0;
+        p.y -= 40.0;
+        let mut t = position.clone();
+        t.x += 20.0;
+        t.y += 25.0;
+        world.spawn((text, position));
+        world.spawn((rect, p));
+        world.spawn((click_text, t));
     }
 }
 
@@ -144,8 +179,6 @@ pub fn start() {
                 input.brake = true;
             }
         }
-        let msg = format!("Pos: {}, {}", x, y);
-        log(&msg);
     }) as Box<dyn Fn(_)>);
     let input_handler = input.clone();
     let up_handler = Closure::wrap(Box::new(move |event|{
@@ -160,8 +193,6 @@ pub fn start() {
                 input.brake = false;
             }
         }
-        let msg = format!("Pos: {}, {}", x, y);
-        log(&msg);
     }) as Box<dyn Fn(_)>);
 
     let input_handler = input.clone();
@@ -176,10 +207,7 @@ pub fn start() {
             if y > 692.0 && y < 784.0 {
                 input.brake = true;
             }
-        }
-        let msg = format!("Pos: {}, {}", x, y);
-        log(&msg);
-        
+        }        
     }) as Box<dyn Fn(_)>);
 
     let input_handler = input.clone();
@@ -252,6 +280,7 @@ pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc
 
             system_spacecraft_input(&mut world, &input, delta);
             system_gravity(&mut world, delta);
+            system_crash(&mut world);
             system_finish(&mut world, &mut input);
             system_hud(&mut world);
             system_offset(&mut world);
