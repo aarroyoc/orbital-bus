@@ -1,12 +1,11 @@
-use std::collections::HashMap;
-
 use hecs::World;
 
+use crate::ImageStore;
 use crate::dynamics::{Celestial, Position, Velocity};
 use crate::renderer::{Renderer};
 use crate::{EndZone, SpaceShip};
 
-pub fn world_level(mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement>) -> World {
+pub fn world_level(mut store: &mut ImageStore) -> World {
     let mut world = World::new();
     {
         let mut renderer = Renderer::sprite("space.png", &mut store);
@@ -59,6 +58,5 @@ pub fn world_level(mut store: &mut HashMap<&'static str, web_sys::HtmlImageEleme
         };
         world.spawn((renderer, position, velocity, spaceship));
     }
-    crate::hud::build_hud(&mut world, &mut store);
     world
 }

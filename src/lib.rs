@@ -20,15 +20,17 @@ use hud::*;
 use renderer::*;
 use web::*;
 
-struct SpaceShip {
-    angle: f64,
-    fuel: f64,
-    initial_fuel: f64,
+type ImageStore = HashMap<&'static str, web_sys::HtmlImageElement>;
+
+pub struct SpaceShip {
+    pub angle: f64,
+    pub fuel: f64,
+    pub initial_fuel: f64,
 }
 
-struct EndZone {
-    width: f64,
-    height: f64,
+pub struct EndZone {
+    pub width: f64,
+    pub height: f64,
 }
 
 #[derive(Default)]
@@ -269,7 +271,7 @@ pub fn start() {
     });
 }
 
-pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc<RefCell<Input>>, store: HashMap<&'static str, web_sys::HtmlImageElement>, prev: Instant){
+pub fn gloop(context: web_sys::CanvasRenderingContext2d, world: World, input: Rc<RefCell<Input>>, store: ImageStore, prev: Instant){
     let mut world = world;
     context.clear_rect(0.0, 0.0, 1360.0, 768.0);
     let now = Instant::now();
