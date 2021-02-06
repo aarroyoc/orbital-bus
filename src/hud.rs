@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
 use hecs::{With, World};
 
-use crate::{SpaceShip, Finish};
+use crate::{SpaceShip, Finish, ImageStore};
 use crate::renderer::{Renderer, Camera};
 use crate::dynamics::Position;
 
@@ -19,9 +17,9 @@ pub fn system_hud(world: &mut World) {
     }
 }
 
-pub fn build_hud(world: &mut World, mut store: &mut HashMap<&'static str, web_sys::HtmlImageElement>) {
+pub fn build_hud(world: &mut World, mut store: &mut ImageStore) {
     {
-        let mut renderer = Renderer::sprite("hud.png", &mut store);
+        let mut renderer = Renderer::sprite("hud.png".to_string(), &mut store);
         renderer.set_fixed(true);
         renderer.set_z(8);
         let position = Position {
@@ -30,7 +28,7 @@ pub fn build_hud(world: &mut World, mut store: &mut HashMap<&'static str, web_sy
         };
         world.spawn((renderer, position));
 
-        let mut renderer = Renderer::sprite("can.png", &mut store);
+        let mut renderer = Renderer::sprite("can.png".to_string(), &mut store);
         renderer.set_fixed(true);
         renderer.set_z(10);
         let position = Position {
@@ -39,7 +37,7 @@ pub fn build_hud(world: &mut World, mut store: &mut HashMap<&'static str, web_sy
         };
         world.spawn((renderer, position));
 
-        let mut renderer = Renderer::rect(77.0, 96.0, "red");
+        let mut renderer = Renderer::rect(77.0, 96.0, "red".to_string());
         renderer.set_fixed(true);
         renderer.set_z(9);
         let position = Position {
@@ -49,7 +47,7 @@ pub fn build_hud(world: &mut World, mut store: &mut HashMap<&'static str, web_sy
         world.spawn((renderer, position, FuelHUD));
     }
     {
-        let mut renderer = Renderer::sprite("controls.png", &mut store);
+        let mut renderer = Renderer::sprite("controls.png".to_string(), &mut store);
         renderer.set_fixed(true);
         renderer.set_z(10);
         let position = Position {
@@ -59,7 +57,7 @@ pub fn build_hud(world: &mut World, mut store: &mut HashMap<&'static str, web_sy
         world.spawn((renderer, position));
     }
     {
-        let mut renderer = Renderer::sprite("back-restart.png", &mut store);
+        let mut renderer = Renderer::sprite("back-restart.png".to_string(), &mut store);
         renderer.set_fixed(true);
         renderer.set_z(10);
         let position = Position {

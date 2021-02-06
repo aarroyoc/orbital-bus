@@ -20,7 +20,7 @@ use hud::*;
 use renderer::*;
 use web::*;
 
-type ImageStore = HashMap<&'static str, web_sys::HtmlImageElement>;
+type ImageStore = HashMap<String, web_sys::HtmlImageElement>;
 
 pub struct SpaceShip {
     pub angle: f64,
@@ -81,13 +81,13 @@ fn system_finish(world: &mut World, mut input: &mut Input) {
     }
     
     if show_win {
-        let mut rect = Renderer::rect(230.0, 75.0, "#1b1b1b");
+        let mut rect = Renderer::rect(230.0, 75.0, "#1b1b1b".to_string());
         rect.set_fixed(true);
         rect.set_z(9);
-        let mut text = Renderer::text(String::from("Success!"), "white", "40px Tsoonami");
+        let mut text = Renderer::text(String::from("Success!"), "white".to_string(), "40px Tsoonami".to_string());
         text.set_fixed(true);
         text.set_z(10);
-        let mut click_text = Renderer::text(String::from("Click to continue"), "white", "14px Tsoonami");
+        let mut click_text = Renderer::text(String::from("Click to continue"), "white".to_string(), "14px Tsoonami".to_string());
         click_text.set_fixed(true);
         click_text.set_z(10);
         let position = Position {
@@ -106,13 +106,13 @@ fn system_finish(world: &mut World, mut input: &mut Input) {
     }
 
     if show_crash {
-        let mut rect = Renderer::rect(230.0, 75.0, "#1b1b1b");
+        let mut rect = Renderer::rect(230.0, 75.0, "#1b1b1b".to_string());
         rect.set_fixed(true);
         rect.set_z(9);
-        let mut text = Renderer::text(String::from("Crash..!"), "white", "40px Tsoonami");
+        let mut text = Renderer::text(String::from("Crash..!"), "white".to_string(), "40px Tsoonami".to_string());
         text.set_fixed(true);
         text.set_z(10);
-        let mut click_text = Renderer::text(String::from("Click to restart"), "white", "14px Tsoonami");
+        let mut click_text = Renderer::text(String::from("Click to restart"), "white".to_string(), "14px Tsoonami".to_string());
         click_text.set_fixed(true);
         click_text.set_z(10);
         let position = Position {

@@ -1,0 +1,154 @@
+/* Orbital Bus Level Definitions in RON format */
+
+Root(
+    planets: [
+        PlanetDef(
+            id: "earth",
+            sprite: "earth.png",
+            radius: 100.0,
+            mass: 5.0,
+        )
+    ],
+    worlds: [
+        World(
+            id: 1,
+            background: true,
+            planets: [
+                (
+                    ref: "earth",
+                    x: 650.0,
+                    y: 400.0,
+                )
+            ],
+            texts: [
+                (
+                    text: "Welcome to Orbital Bus",
+                    color: "white",
+                    style: "20pt Tsoonami",
+                    x: 480.0,
+                    y: 100.0,
+                ),
+                (
+                    text: "The objective is simple. Try to go to the square zone",
+                    color: "white",
+                    style: "15pt Tsoonami",
+                    x: 370.0,
+                    y: 130.0,
+                ),
+                (
+                    text: "Use the keys (W,S) or the on-screen buttons to accelerate and brake",
+                    color: "white",
+                    style: "15pt Tsoonami",
+                    x: 280.0,
+                    y: 150.0,
+                ),
+                (
+                    text: "Be careful! You have limited fuel",
+                    color: "white",
+                    style: "15pt Tsoonami",
+                    x: 470.0,
+                    y: 170.0,
+                )
+            ],
+            spaceship: (
+                x: 800.0,
+                y: 400.0,
+                vx: 0.0,
+                vy: 300.0,
+                fuel: 25.0,
+            ),
+            end: (
+                x: 1050.0,
+                y: 350.0,
+            )
+        ),
+        World(
+            id: 2,
+            background: true,
+            planets: [
+                (
+                    ref: "earth",
+                    x: 650.0,
+                    y: 400.0,
+                )
+            ],
+            spaceship: (
+                x: 800.0,
+                y: 400.0,
+                vx: 0.0,
+                vy: 300.0,
+                fuel: 10.0,
+            ),
+            end: (
+                x: 1050.0,
+                y: 350.0,
+            )
+        ),
+        World(
+            id: 3,
+            background: true,
+            planets: [
+                (
+                    ref: "earth",
+                    x: 650.0,
+                    y: 400.0,
+                )
+            ],
+            spaceship: (
+                x: 1100.0,
+                y: 400.0,
+                vx: 0.0,
+                vy: 300.0,
+                fuel: 12.0 
+            ),
+            end: (
+                x: 800.0,
+                y: 400.0
+            )
+        ),
+        World(
+            id: 4,
+            background: true,
+            planets: [
+                (
+                    ref: "earth",
+                    x: 650.0,
+                    y: 400.0,
+                )
+            ],
+            spaceship: (
+                x: 650.0,
+                y: 700.0,
+                vx: 400.0,
+                vy: 0.0,
+                fuel: 15.0,
+            ),
+            end: (
+                x: 1200.0,
+                y: 400.0,
+            )
+        ),
+        World(
+            id: 5,
+            background: true,
+            planets: [
+                (
+                    ref: "earth",
+                    x: 650.0,
+                    y: 400.0
+                )
+            ],
+            spaceship: (
+                x: 650.0,
+                y: 700.0,
+                vx: 400.0,
+                vy: 0.0,
+                fuel: 15.0,
+            ),
+            end: (
+                x: 1100.0,
+                y: 650.0,
+            )
+        )
+    ]
+)

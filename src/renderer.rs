@@ -1,18 +1,16 @@
 use std::f64;
-use std::collections::HashMap;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use hecs::{World, With};
 use itertools::Itertools;
 
-use crate::SpaceShip;
+use crate::{SpaceShip, ImageStore};
 use crate::web::*;
 use crate::dynamics::*;
 
-type ImageStore = HashMap<&'static str, web_sys::HtmlImageElement>;
-type Color = &'static str;
-type Font = &'static str;
+type Color = String;
+type Font = String;
 
 pub struct Camera {
     pub offset: Position
@@ -40,7 +38,7 @@ pub enum Renderer {
         fixed: bool,
     },
     SpriteRenderer {
-        image: &'static str,
+        image: String,
         z: i32,
         fixed: bool,
     }
@@ -73,13 +71,13 @@ impl Renderer {
             fixed: false,
         }
     }
-    pub fn sprite(url: &'static str, store: &mut ImageStore) -> Self {
+    pub fn sprite(url: String, store: &mut ImageStore) -> Self {
         let img = document().create_element("img")
             .expect("Unable to create img element")
             .dyn_into::<web_sys::HtmlImageElement>()
             .unwrap();
-        img.set_src(url);
-        store.insert(url, img);
+        img.set_src(&url);
+        store.insert(url.clone(), img);
         Renderer::SpriteRenderer {
             image: url,
             z: 0,
@@ -163,8 +161,8 @@ impl Renderer {
                 context.fill_rect(position.x, position.y, *width, *height);
             },
             Renderer::TextRenderer {color, font, text, .. } => {
-                context.set_fill_style(&JsValue::from_str(*color));
-                context.set_font(*font);
+                context.set_fill_style(&JsValue::from_str(color));
+                context.set_font(font);
                 context.fill_text(text, position.x, position.y).unwrap();
             },
             Renderer::SpriteRenderer { image, ..} => {
@@ -194,7 +192,7 @@ pub fn system_offset(world: &mut World) {
     }
 }
 
-pub fn system_renderer<'a>(world: &mut World, context: &web_sys::CanvasRenderingContext2d, store: &HashMap<&'static str, web_sys::HtmlImageElement>) {
+pub fn system_renderer<'a>(world: &mut World, context: &web_sys::CanvasRenderingContext2d, store: &ImageStore) {
     for (_id, camera) in &mut world.query::<&Camera>() {
         world.query::<(&Renderer, &Position)>()
             .iter()
