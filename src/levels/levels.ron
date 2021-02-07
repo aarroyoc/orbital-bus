@@ -7,18 +7,21 @@ Root(
             sprite: "earth.png",
             radius: 100.0,
             mass: 5.0,
+            fix: true,
         ),
         PlanetDef(
             id: "small-earth",
             sprite: "earth.png",
             radius: 100.0,
-            mass: 0.1
+            mass: 1.0,
+            fix: true,
         ),
         PlanetDef(
             id: "mercury",
             sprite: "mercury.png",
-            radius: 50.0,
-            mass: 0.05,
+            radius: 75.0,
+            mass: 5.0,
+            fix: false,
         )
     ],
     worlds: [
@@ -194,25 +197,25 @@ Root(
             background: true,
             planets: [
                 (
-                    ref: "earth",
-                    x: 200.0,
+                    ref: "small-earth",
+                    x: 650.0,
                     y: 400.0,
                 ),
                 (
                     ref: "mercury",
-                    x: 1000.0,
+                    x: 300.0,
                     y: 400.0,
                 )
             ],
             spaceship: (
-                x: 50.0,
+                x: 100.0,
                 y: 400.0,
                 vx: 0.0,
                 vy: 100.0,
-                fuel: 1000.0
+                fuel: 20.0
             ),
             end: (
-                x: 1000.0,
+                x: 950.0,
                 y: 700.0
             )
         )

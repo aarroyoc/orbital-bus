@@ -13,14 +13,19 @@ pub struct Velocity {
     pub y: f64,
 }
 
+#[derive(Clone)]
 pub struct Celestial {
     pub mass: f64,
     pub radius: f64,
 }
 
 pub fn system_gravity(world: &mut World, delta: f64) {
+    let planets: Vec<(Position, Celestial)> = world.query::<(&Position, &Celestial)>().iter().map(|(_id, (pos, cel))|{
+        (pos.clone(), cel.clone())
+    }).collect();
+    
     for (_id, (position, velocity)) in &mut world.query::<(&mut Position, &mut Velocity)>() {
-        for (_id, (celestial_position, celestial)) in &mut world.query::<(&Position, &Celestial)>() {
+        for (celestial_position, celestial) in &planets {
             velocity.x += (celestial_position.x-position.x) * delta * celestial.mass;
             velocity.y += (celestial_position.y-position.y) * delta * celestial.mass;
         }

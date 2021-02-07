@@ -10,6 +10,7 @@ struct PlanetDef {
     sprite: String,
     radius: f64,
     mass: f64,
+    fix: bool,
 }
 
 #[derive(Deserialize)]
@@ -72,7 +73,11 @@ pub fn load_level(level: i32, mut store: &mut ImageStore) -> hecs::World {
 
         for planet in &level.planets {
             if let Some(planet_def) = levels.planets.iter().find(|x| x.id == planet.r#ref) {
-                world.spawn(common::planet(&planet_def.sprite, planet.x, planet.y, planet_def.mass, planet_def.radius, &mut store));
+                if planet_def.fix {
+                    world.spawn(common::fixplanet(&planet_def.sprite, planet.x, planet.y, planet_def.mass, planet_def.radius, &mut store));
+                } else {
+                    world.spawn(common::planet(&planet_def.sprite, planet.x, planet.y, 0.0, 400.0, planet_def.mass, planet_def.radius, &mut store));
+                }
             }
         }
 

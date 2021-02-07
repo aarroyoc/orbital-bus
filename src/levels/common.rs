@@ -31,7 +31,7 @@ pub fn spaceship(x: f64, y: f64, vx: f64, vy: f64, fuel: f64, mut store: &mut Im
     (renderer, position, velocity, spaceship)
 }
 
-pub fn planet(sprite: &str, x: f64, y: f64, mass: f64, radius: f64, mut store: &mut ImageStore) -> (Renderer, Position, Celestial) {
+pub fn fixplanet(sprite: &str, x: f64, y: f64, mass: f64, radius: f64, mut store: &mut ImageStore) -> (Renderer, Position, Celestial) {
     let renderer = Renderer::sprite(sprite.to_string(), &mut store);
     let position = Position {
         x,
@@ -42,6 +42,23 @@ pub fn planet(sprite: &str, x: f64, y: f64, mass: f64, radius: f64, mut store: &
         radius,
     };
     (renderer, position, planet)
+}
+
+pub fn planet(sprite: &str, x: f64, y: f64, vx: f64, vy: f64, mass: f64, radius: f64, mut store: &mut ImageStore) -> (Renderer, Position, Celestial, Velocity) {
+    let renderer = Renderer::sprite(sprite.to_string(), &mut store);
+    let position = Position {
+        x,
+        y,
+    };
+    let planet = Celestial {
+        mass,
+        radius,
+    };
+    let velocity = Velocity {
+        x: vx,
+        y: vy,
+    };
+    (renderer, position, planet, velocity)
 }
 
 pub fn end_zone(x: f64, y: f64) -> (Renderer, Position, EndZone) {
